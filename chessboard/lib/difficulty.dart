@@ -33,7 +33,7 @@ class _difficultyState extends State<difficulty> {
               children: <Widget>[
                 colorpicker(),
                 SizedBox(height: 20,),
-                MyButton(context, 'Easy', assists(human: 2, check: check)),
+                MyButton(context, 'Easy', assists(human: 3, check: check)),
                 SizedBox(height: 20,),
                 MyButton(context, 'Medium', assists(human: 2, check: check)),
                 SizedBox(height: 20,),

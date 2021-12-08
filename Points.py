@@ -32,20 +32,10 @@ def material(board):
     score = 0
     for i in chess.SQUARES:
         if (board.piece_at(i) != None):
-            if (board.color_at(i) == chess.COLORS[0]):
+            if (board.color_at(i) == True):
                 score += piecePoints[board.piece_type_at(i)]
             else:
                 score -= piecePoints[board.piece_type_at(i)]
-    return score
-
-def incheck(board, turn):
-    score = 0
-    if (board.is_check()):
-        if (turn == True):
-            score += 1
-        else:
-            score -= 1
-
     outcome = board.outcome()
     if (outcome != None):
         #print('TERMINATION DETECTED: ', outcome.termination)
@@ -59,5 +49,14 @@ def incheck(board, turn):
                 return -inf
     return score
 
+def incheck(board, turn):
+    score = 0
+    if (board.is_check()):
+        if (turn == True):
+            score += 1
+        else:
+            score -= 1
+    return score
+
 def heuristic(board, turn):
-    return material(board) + piece_moves(board,turn) + incheck(board,turn)
+    return material(board)# + incheck(board,turn) + piece_moves(board,turn)

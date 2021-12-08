@@ -4,6 +4,7 @@ from Points import piecePoints
 import Points
 from MoveEval import MoveEval
 from math import inf
+import json
 
 
 class Player:
@@ -57,13 +58,23 @@ class Player:
                     break
             return minValue
 
-    def makeMove(self, board, depth, turn):
+    async def makeMove(self, board, depth, turn, client):
         if(self.recommendMoves == True):
             print('\nRECOMMENDED MOVE:',self.recommend(board, depth, turn, MoveEval("",-inf),MoveEval("",inf)).move)
-        while(1):    
-            move = input('DESIRED MOVE: ')
+        while(1):
+            move = await client.recv()
+            print(move, "\n")
+            # dataParsed = ast.literal_eval(data)
+            movedata = json.loads(move)
+            if (movedata['status'] != 'inprogress'):
+                print('returning same')
+                return board
+            movefrom = chess.SQUARES[movedata['from']]
+            print(movefrom)
+            moveto = chess.SQUARES[movedata['to']]
+            print(moveto)
             try:
-                board.push_san(move)
+                board.push(board.find_move(from_square=movefrom,to_square=moveto))
                 return (board)
                 # history.append(board.fen())
             except:

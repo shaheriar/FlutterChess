@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'Classes/Color.dart';
+import 'game.dart';
 import 'winsplash.dart';
 import 'Classes/Assists.dart';
 import 'package:flutter/foundation.dart';
@@ -25,6 +26,12 @@ class _altgameState extends State<altgame> {
   var wsec;
   bool flag = false;
   bool winner = false;
+  bool turn = false;
+  int movefrom = -1;
+  int moveto = -1;
+  bool fromclicked = false;
+  bool toclicked = false;
+  List<dynamic> boardlist = [];
   ScrollController _scrollControllerw = ScrollController();
   ScrollController _scrollControllerb = ScrollController();
   List<String> moves = [];
@@ -32,6 +39,7 @@ class _altgameState extends State<altgame> {
 
   _altgameState(Assists assists) {
     inf = assists;
+    turn = inf.check;
   }
   _scrollw() {
     _scrollControllerw.jumpTo(_scrollControllerw.position.maxScrollExtent);
@@ -48,6 +56,7 @@ class _altgameState extends State<altgame> {
     bsec = 0;
     wmin = 30;
     wsec = 0;
+    boardlist = List.from(defaultboard.reversed);
   }
 
   @override
@@ -60,7 +69,10 @@ class _altgameState extends State<altgame> {
         child: Column(
           children: [
             times(),
-            Container(height: 10, color: primary),
+            Container(
+              height: 10,
+              color: primary,
+            ),
             moveslist(),
             buttons(),
           ],
@@ -74,14 +86,17 @@ class _altgameState extends State<altgame> {
         stream: Stream.periodic(const Duration(seconds: 1)),
         builder: (context, snapshot) {
           if (moves.length % 2 == 0) {
+            turn = false;
             whitetime();
-            winner = false;
           } else {
+            turn = true;
             blacktime();
-            winner = true;
           }
           if (bsec == 0 && bmin == 0) {
-            _channel.sink.add('Time');
+            Map mp = {
+              'status': 'Time'
+            };
+            _channel.sink.add(jsonEncode(mp));
             flag = true;
             winner = flag;
             Future.delayed(Duration.zero, () async {
@@ -90,7 +105,7 @@ class _altgameState extends State<altgame> {
                 PageRouteBuilder(
                   opaque: false,
                   pageBuilder: (context, animation1, animation2) =>
-                      WinSplash(win: false),
+                      WinSplash(win: true),
                 ),
               );
             });
@@ -104,12 +119,13 @@ class _altgameState extends State<altgame> {
                 PageRouteBuilder(
                   opaque: false,
                   pageBuilder: (context, animation1, animation2) =>
-                      WinSplash(win: true),
+                      WinSplash(win: false),
                 ),
               );
             });
           }
           return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
                 color: lightbrown,
@@ -122,10 +138,6 @@ class _altgameState extends State<altgame> {
                         color: primary),
                   ),
                 ),
-              ),
-              Container(
-                width: 10,
-                color: primary,
               ),
               Container(
                 color: darkbrown,
@@ -144,6 +156,130 @@ class _altgameState extends State<altgame> {
         });
   }
 
+  Widget chessboard() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          height: 400,
+          width: 20,
+          child: ListView.builder(
+              itemCount: 8,
+              itemBuilder: (BuildContext context, int index) {
+                int i = 8 - index;
+                return SizedBox(
+                    height: 50,
+                    child: Text(
+                      '$i',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                );
+              }),
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            SizedBox(
+              height: 400,
+              width: 400,
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 8,
+                ),
+                itemBuilder: _buildGridItems,
+                itemCount: 64,
+              ),
+            ),
+            Container(
+              width: 400,
+              height: 20,
+              child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 8,
+                  itemBuilder: (BuildContext context, int index) {
+                    String c = String.fromCharCode(index + 97);
+                    return SizedBox(
+                      width: 50,
+                      child: Center(
+                        child: Text(
+                          '$c',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    );
+                  }),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGridItems(BuildContext context, int index) {
+    return GridTile(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            
+          if (!fromclicked) {
+            movefrom = index;
+            fromclicked = true;
+          } else if (fromclicked && !toclicked) {
+            moveto = index;
+            toclicked = true;
+          } else {
+            fromclicked = false;
+            toclicked = false;
+            movefrom = -1;
+            moveto = -1;
+          }
+          if (movefrom != -1 && moveto != -1) {
+            if (movefrom == moveto) {
+              fromclicked = false;
+              toclicked = false;
+              movefrom = -1;
+              moveto = -1;
+            } else {
+
+          Map map = {
+          'from': translate(movefrom), 
+          'to': translate(moveto),
+          'status': 'inprogress'
+          };
+          String mp = jsonEncode(map);
+          _channel.sink.add(mp);
+          
+            fromclicked = false;
+            toclicked = false;
+            movefrom = -1;
+            moveto = -1;
+
+            }
+            
+          }
+          });
+        },
+        child: Stack(
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              color: movefrom == index ? Colors.green : getcolor(index),
+            ),
+            Center(child: getpiece(boardlist[index].toString())),
+          ],
+        ),
+      ),
+    );
+  }
+
+  translate(int n) {
+    int j = (n / 8).floor();
+    int k = n % 8;
+    int h = 64 - (8 - k) - (8*j);
+    return h;
+  }
+
   moveslist() {
     return StreamBuilder(
         stream: _channel.stream,
@@ -155,46 +291,44 @@ class _altgameState extends State<altgame> {
                 moves.add(data["move"]);
               }
             }
+            if (data["board"] != null) {
+              boardlist = data["board"];
+              boardlist = List.from(boardlist);
+            }
+            print(data);
           }
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Container(
-                  color: lightbrown,
-                  width: MediaQuery.of(context).size.width / 2 - 5,
-                  height: MediaQuery.of(context).size.height - 190,
-                  child: ListView.builder(
-                    controller: _scrollControllerw,
-                    reverse: true,
-                    shrinkWrap: true,
-                    itemCount: moves.length,
-                    itemBuilder: (context, index) {
-                      _scrollw();
-                      return Center(child: getMove(true, index));
-                    },
-                  ),
+              Container(
+                color: lightbrown,
+                width: MediaQuery.of(context).size.width / 4 - 5,
+                height: MediaQuery.of(context).size.height / 2,
+                child: ListView.builder(
+                  controller: _scrollControllerw,
+                  reverse: true,
+                  shrinkWrap: true,
+                  itemCount: moves.length,
+                  itemBuilder: (context, index) {
+                    _scrollw();
+                    return Center(child: getMove(true, index));
+                  },
                 ),
               ),
+              chessboard(),
               Container(
-                width: 10,
-                color: primary,
-              ),
-              Expanded(
-                child: Container(
-                  color: darkbrown,
-                  width: MediaQuery.of(context).size.width / 2 - 5,
-                  height: MediaQuery.of(context).size.height - 190,
-                  child: ListView.builder(
-                    controller: _scrollControllerb,
-                    reverse: true,
-                    shrinkWrap: true,
-                    itemCount: moves.length,
-                    itemBuilder: (context, index) {
-                      _scrollb();
-                      return Center(child: getMove(false, index));
-                    },
-                  ),
+                color: darkbrown,
+                width: MediaQuery.of(context).size.width / 5 - 5,
+                height: MediaQuery.of(context).size.height / 2,
+                child: ListView.builder(
+                  controller: _scrollControllerb,
+                  reverse: true,
+                  shrinkWrap: true,
+                  itemCount: moves.length,
+                  itemBuilder: (context, index) {
+                    _scrollb();
+                    return Center(child: getMove(false, index));
+                  },
                 ),
               ),
             ],
@@ -255,7 +389,7 @@ class _altgameState extends State<altgame> {
       if (index % 2 == 0) {
         return Text(
           moves[index],
-          style: TextStyle(fontSize: 100, color: primary),
+          style: TextStyle(fontSize: 50, color: primary),
         );
       } else {
         return Container();
@@ -264,7 +398,7 @@ class _altgameState extends State<altgame> {
       if (index % 2 == 1) {
         return Text(
           moves[index],
-          style: TextStyle(fontSize: 100, color: Colors.white),
+          style: TextStyle(fontSize: 50, color: Colors.white),
         );
       } else {
         return Container();
@@ -281,13 +415,16 @@ class _altgameState extends State<altgame> {
         backgroundColor: primary,
       ),
       onPressed: () {
-        _channel.sink.add('Resign');
+        Map mp = {
+                    'status': 'Resign'
+                  };
+        _channel.sink.add(jsonEncode(mp));
         Navigator.push(
           context,
           PageRouteBuilder(
             opaque: false,
             pageBuilder: (context, animation1, animation2) =>
-                WinSplash(win: winner),
+                WinSplash(win: turn),
           ),
         );
       },
@@ -345,7 +482,10 @@ class _altgameState extends State<altgame> {
                   backgroundColor: darkbrown,
                 ),
                 onPressed: () {
-                  _channel.sink.add('Draw');
+                  Map mp = {
+                    'status': 'Draw'
+                  };
+                  _channel.sink.add(jsonEncode(mp));
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
                 child: Text(
@@ -385,3 +525,70 @@ class _altgameState extends State<altgame> {
     );
   }
 }
+
+List<String> defaultboard = [
+  'R',
+  'N',
+  'B',
+  'K',
+  'Q',
+  'B',
+  'N',
+  'R',
+  'P',
+  'P',
+  'P',
+  'P',
+  'P',
+  'P',
+  'P',
+  'P',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  '.',
+  'p',
+  'p',
+  'p',
+  'p',
+  'p',
+  'p',
+  'p',
+  'p',
+  'r',
+  'n',
+  'b',
+  'k',
+  'q',
+  'b',
+  'n',
+  'r'
+];

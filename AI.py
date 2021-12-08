@@ -34,10 +34,10 @@ class AI(Player):
                 if(value.evaluation >= maxValue.evaluation):
                     maxValue = value
                     maxValue.move = i.uci()
-                if (maxValue.evaluation >= alpha.evaluation):
-                    alpha = maxValue
-                if (beta.evaluation <= alpha.evaluation):
-                    break
+                #if (maxValue.evaluation >= alpha.evaluation):
+                #    alpha = maxValue
+                #if (beta.evaluation <= alpha.evaluation):
+                #    break
             return maxValue
         else:
             minValue = MoveEval("", inf)
@@ -52,10 +52,10 @@ class AI(Player):
                 if(value.evaluation <= minValue.evaluation):
                     minValue = value
                     minValue.move = i.uci()
-                if (minValue.evaluation <= beta.evaluation):
-                    beta = minValue
-                if (beta.evaluation <= alpha.evaluation):
-                    break
+                #if (minValue.evaluation <= beta.evaluation):
+                #    beta = minValue
+                #if (beta.evaluation <= alpha.evaluation):
+                #    break
             return minValue
             
 

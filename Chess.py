@@ -32,7 +32,7 @@ class chessGame:
     async def menu(self, client):
         global player1
         global player2
-        global AI
+        global AIPlayer
         global userColorForAIMode
         mode = 0
         print('------------------------------')
@@ -51,9 +51,13 @@ class chessGame:
             return 1
         elif(dataParsed["gamemode"] == 2):
             player1 = Player(dataParsed["player1"])
-            AI = AI(False, 0)
+            AIPlayer = AI(False, 0)
             userColorForAIMode = dataParsed["usercolor"]
             return 2
+        elif(dataParsed["gamemode"] == 3):
+            player1 = AI(False, 0)
+            player2 = AI(False, 0)
+            return 3
 
         return
 
@@ -63,17 +67,9 @@ class chessGame:
         isGameOver = None
         board = chess.Board()
         history = []
-
+        lastmove = None
         while (not board.is_checkmate() or not board.is_stalemate() or not board.is_fivefold_repetition()):
             # isGameOver = await client.recv()
-            if (isGameOver == 'Draw'):
-                print('GAME ENDED BY DRAW')
-                # Save game up to here
-                break
-            elif isGameOver == 'Resign':
-                print("GAME ENDED BY RESIGNATION")
-                # Save game up to here
-                break
 
             print('\n')
             print('-----------')
@@ -103,26 +99,26 @@ class chessGame:
 
             if(gameMode == 1):
                 if turn == 0:
-                    board = player1.makeMove(board, 3, turn)
+                    board = await player1.makeMove(board, 3, turn, client)
                 else:
-                    board = player2.makeMove(board, 3, turn)
+                    board = await player2.makeMove(board, 3, turn, client)
             elif(gameMode == 2):
                 if userColorForAIMode == False:  # The user is white because 0 is white
                     if turn == 0:
-                        board = player1.makeMove(board, 3, turn)
+                        board = await player1.makeMove(board, 3, turn, client)
                     else:
                         if(numberOfMoves < 2):
-                            board = AI.makeFirstMove(board)
+                            board = AIPlayer.makeFirstMove(board)
                         else:
-                            board = AI.makeMove(board, 3, turn)
+                            board = AIPlayer.makeMove(board, 3, turn)
                 else:  # The user is black because 1 is black
                     if turn == 0:
                         if(numberOfMoves < 2):
-                            board = AI.makeFirstMove(board)
+                            board = AIPlayer.makeFirstMove(board)
                         else:
-                            board = AI.makeMove(board, 3, turn)
+                            board = AIPlayer.makeMove(board, 3, turn)
                     else:
-                        board = player1.makeMove(board, 3, turn)
+                        board = await player1.makeMove(board, 3, turn, client)
             elif(gameMode == 3):
                 if turn == 0:
                     if(numberOfMoves < 2):
@@ -134,16 +130,43 @@ class chessGame:
                         board = player2.makeFirstMove(board)
                     else:
                         board = player2.makeMove(board, 3, turn)
-
+            try:
+                board.peek()
+            except:
+                print('game ended with no moves made')
+                break
+            if (lastmove == board.peek()):
+                print('same board')
+                break
+            lastmove = board.peek()
             turn = not turn
-            moveData = {"move": board.peek().uci()}
+            boardlist = list()
+            columns = chess.FILE_NAMES
+            for j in reversed(range(1,9)):
+                for i in columns:
+                    sqr = board.piece_at(chess.parse_square(i+str(j)))
+                    if (sqr != None):
+                        boardlist.append(sqr.symbol())
+                    else:
+                        boardlist.append('.')
+            
+            moveData = {"move": board.peek().uci(), "board": boardlist}
+            print(boardlist)
             await client.send(json.dumps(moveData))
-            time.sleep(1)
+            time.sleep(0.5)
             isGameOver = await client.recv()
             if (isGameOver == 'Time'):
                 print('GAME ENDED BY TIME')
                 break
-            time.sleep(1)
+            if (isGameOver == 'Draw'):
+                print('GAME ENDED BY DRAW')
+                # Save game up to here
+                break
+            elif isGameOver == 'Resign':
+                print("GAME ENDED BY RESIGNATION")
+                # Save game up to here
+                break
+            time.sleep(0.5)
             print('MESSAGE SENT')
             numberOfMoves += 1
 

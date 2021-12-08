@@ -12,8 +12,10 @@ class WinSplash extends StatefulWidget {
 
 class _WinSplashState extends State<WinSplash> {
   @override
-  bool winner;
-  _WinSplashState(this.winner);
+  bool winner = false;
+  _WinSplashState(bool win) {
+    winner = win;
+  }
   Widget build(BuildContext context) {
     return splash(context, winner);
   }
