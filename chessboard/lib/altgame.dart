@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'Classes/Color.dart';
+import 'drawsplash.dart';
 import 'game.dart';
 import 'winsplash.dart';
 import 'Classes/Assists.dart';
@@ -129,24 +130,26 @@ class _altgameState extends State<altgame> {
             children: [
               Container(
                 color: lightbrown,
-                width: MediaQuery.of(context).size.width / 2 - 5,
+                width: MediaQuery.of(context).size.width / 4,
                 child: Center(
                   child: Text(
                     formattime(wmin, wsec),
                     style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width / 8,
+                        fontSize: MediaQuery.of(context).size.width / 20,
                         color: primary),
                   ),
                 ),
               ),
+              turn ? Text('Black\'s Turn',style: TextStyle(color: Colors.white, fontSize: 50)) : Text('White\'s Turn',style: TextStyle(color: Colors.white, fontSize: 50)),
+              Text('Move ${moves.length}', style: TextStyle(color: Colors.white, fontSize: 50),),
               Container(
                 color: darkbrown,
-                width: MediaQuery.of(context).size.width / 2 - 5,
+                width: MediaQuery.of(context).size.width / 4,
                 child: Center(
                   child: Text(
                     formattime(bmin, bsec),
                     style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width / 8,
+                        fontSize: MediaQuery.of(context).size.width / 20,
                         color: Colors.white),
                   ),
                 ),
@@ -159,29 +162,34 @@ class _altgameState extends State<altgame> {
   Widget chessboard() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          height: 400,
+          height: MediaQuery.of(context).size.width / 3,
           width: 20,
           child: ListView.builder(
               itemCount: 8,
+              reverse: true,
               itemBuilder: (BuildContext context, int index) {
-                int i = 8 - index;
-                return SizedBox(
-                    height: 50,
-                    child: Text(
-                      '$i',
-                      style: TextStyle(color: Colors.white),
+                int i = index+1;
+                return Container(
+                    height: (MediaQuery.of(context).size.width / 3)/8,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        '$i',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                 );
               }),
         ),
         Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             SizedBox(
-              height: 400,
-              width: 400,
+              height: MediaQuery.of(context).size.width / 3,
+              width: MediaQuery.of(context).size.width / 3,
               child: GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 8,
@@ -191,7 +199,7 @@ class _altgameState extends State<altgame> {
               ),
             ),
             Container(
-              width: 400,
+              width: MediaQuery.of(context).size.width / 3,
               height: 20,
               child: ListView.builder(
                   scrollDirection: Axis.horizontal,
@@ -199,7 +207,7 @@ class _altgameState extends State<altgame> {
                   itemBuilder: (BuildContext context, int index) {
                     String c = String.fromCharCode(index + 97);
                     return SizedBox(
-                      width: 50,
+                      width: (MediaQuery.of(context).size.width / 3)/8,
                       child: Center(
                         child: Text(
                           '$c',
@@ -211,6 +219,7 @@ class _altgameState extends State<altgame> {
             ),
           ],
         ),
+        
       ],
     );
   }
@@ -220,7 +229,11 @@ class _altgameState extends State<altgame> {
       child: GestureDetector(
         onTap: () {
           setState(() {
-            
+            if (turn) {
+              bsec += 1;
+            } else {
+              wsec += 1;
+            }
           if (!fromclicked) {
             movefrom = index;
             fromclicked = true;
@@ -295,6 +308,32 @@ class _altgameState extends State<altgame> {
               boardlist = data["board"];
               boardlist = List.from(boardlist);
             }
+            if (data["status"] != null) {
+              String status = data["status"];
+              if (status == "checkmate" || status == "stalemate" || status == "repetition") {
+                if (status == "checkmate") {
+                  WidgetsBinding.instance!.addPostFrameCallback(
+     (_) => Navigator.push(
+          context,
+          PageRouteBuilder(
+            opaque: false,
+            pageBuilder: (context, animation1, animation2) =>
+                WinSplash(win: turn),
+          ),
+        ),);
+                } else {
+                   WidgetsBinding.instance!.addPostFrameCallback(
+     (_) => Navigator.push(
+          context,
+          PageRouteBuilder(
+            opaque: false,
+            pageBuilder: (context, animation1, animation2) =>
+                DrawSplash(status: status),
+          ),
+        ),);
+                }
+              }
+            }
             print(data);
           }
           return Row(
@@ -302,11 +341,10 @@ class _altgameState extends State<altgame> {
             children: [
               Container(
                 color: lightbrown,
-                width: MediaQuery.of(context).size.width / 4 - 5,
-                height: MediaQuery.of(context).size.height / 2,
+                width: MediaQuery.of(context).size.width / 4,
+                height: MediaQuery.of(context).size.height - 200,
                 child: ListView.builder(
                   controller: _scrollControllerw,
-                  reverse: true,
                   shrinkWrap: true,
                   itemCount: moves.length,
                   itemBuilder: (context, index) {
@@ -318,11 +356,10 @@ class _altgameState extends State<altgame> {
               chessboard(),
               Container(
                 color: darkbrown,
-                width: MediaQuery.of(context).size.width / 5 - 5,
-                height: MediaQuery.of(context).size.height / 2,
+                width: MediaQuery.of(context).size.width / 4,
+                height: MediaQuery.of(context).size.height - 200,
                 child: ListView.builder(
                   controller: _scrollControllerb,
-                  reverse: true,
                   shrinkWrap: true,
                   itemCount: moves.length,
                   itemBuilder: (context, index) {
@@ -340,11 +377,13 @@ class _altgameState extends State<altgame> {
     return Container(
       color: primary,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Container(color: lightbrown,height: MediaQuery.of(context).size.height / 10,width: MediaQuery.of(context).size.width / 4,),
           offerdraw(),
           altresignbutton(),
+          Container(color: darkbrown,height: MediaQuery.of(context).size.height / 10,width: MediaQuery.of(context).size.width / 4,),
         ],
       ),
     );
@@ -409,8 +448,8 @@ class _altgameState extends State<altgame> {
   Widget altresignbutton() {
     return TextButton(
       style: TextButton.styleFrom(
-        fixedSize: Size(MediaQuery.of(context).size.width / 3,
-            MediaQuery.of(context).size.height / 8),
+        fixedSize: Size(MediaQuery.of(context).size.width / 4,
+            MediaQuery.of(context).size.height / 10),
         primary: Colors.white,
         backgroundColor: primary,
       ),
@@ -430,7 +469,7 @@ class _altgameState extends State<altgame> {
       },
       child: Text(
         'Resign',
-        style: TextStyle(fontSize: MediaQuery.of(context).size.width / 16),
+        style: TextStyle(fontSize: 50),
       ),
     );
   }
@@ -438,8 +477,8 @@ class _altgameState extends State<altgame> {
   Widget offerdraw() {
     return TextButton(
       style: TextButton.styleFrom(
-        fixedSize: Size(MediaQuery.of(context).size.width / 3,
-            MediaQuery.of(context).size.height / 8),
+        fixedSize: Size(MediaQuery.of(context).size.width / 4,
+            MediaQuery.of(context).size.height / 10),
         primary: Colors.white,
         backgroundColor: primary,
       ),
@@ -454,7 +493,7 @@ class _altgameState extends State<altgame> {
       },
       child: Text(
         'Offer Draw',
-        style: TextStyle(fontSize: MediaQuery.of(context).size.width / 16),
+        style: TextStyle(fontSize: 50),
       ),
     );
   }
