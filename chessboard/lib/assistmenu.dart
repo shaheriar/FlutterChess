@@ -33,22 +33,38 @@ class _assistsState extends State<assists> {
       body: Stack(
         children: [
           background(),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'AI Assists',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 80,
-                  fontWeight: FontWeight.bold,
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Ready?',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 80,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Row(
+                SizedBox(
+                  height: 20,
+                ),
+                //recommendedbutton(),
+                SizedBox(
+                  height: 50,
+                ),
+                MyButton(context, 'Play', syncgame(assists: Assists(w,b,h,check),)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+Widget recommendedbutton() {
+  
+              return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextButton(
@@ -103,17 +119,8 @@ class _assistsState extends State<assists> {
                     ],
                   ) : Container(),
                 ],
-              ),
-              SizedBox(
-                height: 50,
-              ),
-              MyButton(context, 'Play', syncgame(assists: Assists(w,b,h,check),)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+              );
+}
 }
 
 Widget MyButton(BuildContext context, String text, Widget widget) {

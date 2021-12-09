@@ -32,6 +32,7 @@ class _altgameState extends State<altgame> {
   int moveto = -1;
   bool fromclicked = false;
   bool toclicked = false;
+  bool thinking = false;
   List<dynamic> boardlist = [];
   ScrollController _scrollControllerw = ScrollController();
   ScrollController _scrollControllerb = ScrollController();
@@ -141,6 +142,7 @@ class _altgameState extends State<altgame> {
                 ),
               ),
               turn ? Text('Black\'s Turn',style: TextStyle(color: Colors.white, fontSize: 50)) : Text('White\'s Turn',style: TextStyle(color: Colors.white, fontSize: 50)),
+              Container(height: 50,width: 50,child: (turn != inf.check && inf.h != 1) ?  CircularProgressIndicator(color: Colors.white,) : Container(),),
               Text('Move ${moves.length}', style: TextStyle(color: Colors.white, fontSize: 50),),
               Container(
                 color: darkbrown,
@@ -335,6 +337,8 @@ class _altgameState extends State<altgame> {
               }
             }
             print(data);
+          } else {
+            thinking = true;
           }
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
