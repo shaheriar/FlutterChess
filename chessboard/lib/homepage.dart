@@ -31,11 +31,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 Expanded(child: Container()),
                 Row(
                   children: [
-                    settingsbutton(),
+                    //settingsbutton(),
                     SizedBox(width: 10,),
-                    historybutton(),
+                    //historybutton(),
                     Expanded(child: Container()),
-                    Text('By: The Segfaults',style: TextStyle(fontSize: 20, color: Colors.white),),
+                    Text('Branched from "Smart Chessboard" by The Segfaults',style: TextStyle(fontSize: 20, color: Colors.white),),
                     SizedBox(width: 20,)
                   ],
                 )
@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   title() {
     return Text(
-      'Smart Chessboard',
+      'Flython Chess',
       style: TextStyle(
         color: Colors.white,
         fontSize: 80,
