@@ -34,6 +34,7 @@ class _altgameState extends State<altgame> {
   bool toclicked = false;
   bool thinking = false;
   List<dynamic> boardlist = [];
+  List<dynamic> legalmoves = [];
   ScrollController _scrollControllerw = ScrollController();
   ScrollController _scrollControllerb = ScrollController();
   List<String> moves = [];
@@ -59,6 +60,7 @@ class _altgameState extends State<altgame> {
     wmin = 30;
     wsec = 0;
     boardlist = List.from(defaultboard.reversed);
+    legalmoves = ['g1h3', 'g1f3', 'b1c3', 'b1a3', 'h2h3', 'g2g3', 'f2f3', 'e2e3', 'd2d3', 'c2c3', 'b2b3', 'a2a3', 'h2h4', 'g2g4', 'f2f4', 'e2e4', 'd2d4', 'c2c4', 'b2b4', 'a2a4'];
   }
 
   @override
@@ -279,13 +281,41 @@ class _altgameState extends State<altgame> {
             Container(
               width: 90,
               height: 90,
-              color: movefrom == index ? Colors.green : getcolor(index),
+              color: getcolor(index),
             ),
+            
             Center(child: getpiece(boardlist[index].toString())),
+            Center(
+              child: Container(
+                width: 20,
+                height: 20,
+          decoration: BoxDecoration(
+              color: decidecolor(movefrom, index),
+              shape: BoxShape.circle
+          ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  decidecolor(int movefrom, int index) {
+    if (movefrom == index) {
+      return Colors.green;
+    } else if (legalmoves.length > 0 && movefrom != -1) {
+      for (int i = 0; i < legalmoves.length; i++) {
+      if (legalmoves[i].substring(0,2) == squares[translate(movefrom)]) {
+        for (int j = 0; j < squares.length; j++) {
+          if (squares[j] == legalmoves[i].substring(2) && j == translate(index)) {
+            return Colors.yellow;
+          }
+        }
+      }
+    }
+    }
+    return Colors.transparent;
   }
 
   translate(int n) {
@@ -335,6 +365,9 @@ class _altgameState extends State<altgame> {
         ),);
                 }
               }
+            }
+            if (data["legalmoves"] != null) {
+              legalmoves = data["legalmoves"];
             }
             print(data);
           } else {
@@ -634,4 +667,15 @@ List<String> defaultboard = [
   'b',
   'n',
   'r'
+];
+
+List<String> squares = [
+    'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1',
+    'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
+    'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
+    'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
+    'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
+    'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
+    'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
+    'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
 ];

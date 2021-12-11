@@ -104,7 +104,6 @@ class chessGame:
                 await client.send(json.dumps(moveData))
                 break
             print(board.legal_moves)
-
             if(gameMode == 1):
                 if turn == 0:
                     board = await player1.makeMove(board, 3, turn, client)
@@ -158,7 +157,10 @@ class chessGame:
                     else:
                         boardlist.append('.')
             
-            moveData = {"move": board.peek().uci(), "board": boardlist, "status": "inprogress"}
+            legal = []
+            for x in list(board.legal_moves):
+                legal.append(x.uci())
+            moveData = {"move": board.peek().uci(), "board": boardlist, "status": "inprogress", "legalmoves": legal}
             print(boardlist)
             await client.send(json.dumps(moveData))
             time.sleep(0.5)
