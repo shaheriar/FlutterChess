@@ -160,7 +160,7 @@ class chessGame:
             legal = []
             for x in list(board.legal_moves):
                 legal.append(x.uci())
-            moveData = {"move": board.peek().uci(), "board": boardlist, "status": "inprogress", "legalmoves": legal}
+            moveData = {"move": board.peek().uci(), "board": boardlist, "status": "inprogress", "legalmoves": legal, 'ischeck': board.is_check()}
             print(boardlist)
             await client.send(json.dumps(moveData))
             time.sleep(0.5)

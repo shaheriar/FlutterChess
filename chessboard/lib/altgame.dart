@@ -28,6 +28,7 @@ class _altgameState extends State<altgame> {
   bool flag = false;
   bool winner = false;
   bool turn = false;
+  bool ischeck = false;
   int movefrom = -1;
   int moveto = -1;
   bool fromclicked = false;
@@ -143,7 +144,7 @@ class _altgameState extends State<altgame> {
                   ),
                 ),
               ),
-              turn ? Text('Black\'s Turn',style: TextStyle(color: Colors.white, fontSize: 50)) : Text('White\'s Turn',style: TextStyle(color: Colors.white, fontSize: 50)),
+              ischeck ? Text('Check!',style: TextStyle(color: Colors.white, fontSize: 50)) : turn ? Text('Black\'s Turn',style: TextStyle(color: Colors.white, fontSize: 50)) : Text('White\'s Turn',style: TextStyle(color: Colors.white, fontSize: 50)),
               Container(height: 50,width: 50,child: (turn != inf.check && inf.h != 1) ?  CircularProgressIndicator(color: Colors.white,) : Container(),),
               Text('Move ${moves.length}', style: TextStyle(color: Colors.white, fontSize: 50),),
               Container(
@@ -281,7 +282,7 @@ class _altgameState extends State<altgame> {
             Container(
               width: 90,
               height: 90,
-              color: getcolor(index),
+              color: moves.length > 0 ? ((moves[moves.length-1].substring(0,2) == squares[translate(index)] || moves[moves.length-1].substring(2) == squares[translate(index)]) ? Colors.amber : getcolor(index)) : getcolor(index),
             ),
             
             Center(child: getpiece(boardlist[index].toString())),
@@ -302,6 +303,15 @@ class _altgameState extends State<altgame> {
   }
 
   decidecolor(int movefrom, int index) {
+    if (boardlist[index].toString() == 'K' && turn) {
+      if (ischeck) {
+        return Colors.red;
+      }
+    } else if (boardlist[index].toString() == 'k' && !turn) {
+      if (ischeck) {
+        return Colors.red;
+      }
+    }
     if (movefrom == index) {
       return Colors.green;
     } else if (legalmoves.length > 0 && movefrom != -1) {
@@ -339,6 +349,9 @@ class _altgameState extends State<altgame> {
             if (data["board"] != null) {
               boardlist = data["board"];
               boardlist = List.from(boardlist);
+            }
+            if (data["ischeck"] != null) {
+              ischeck = data["ischeck"];
             }
             if (data["status"] != null) {
               String status = data["status"];
