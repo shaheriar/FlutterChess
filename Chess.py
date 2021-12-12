@@ -112,12 +112,12 @@ class chessGame:
             elif(gameMode == 2):
                 if userColorForAIMode == False:  # The user is white because 0 is white
                     if turn == 0:
-                        board = await player1.makeMove(board, 1, turn, client)
+                        board = await player1.makeMove(board, 3, turn, client)
                     else:
                         if(numberOfMoves < 2):
                             board = AIPlayer.makeFirstMove(board)
                         else:
-                            board = AIPlayer.makeMove(board, 1, turn)
+                            board = AIPlayer.makeMove(board, 3, turn)
                 else:  # The user is black because 1 is black
                     if turn == 0:
                         if(numberOfMoves < 2):
