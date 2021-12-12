@@ -3,6 +3,12 @@
 ## Overview
 This is a branch made by Shaheriar Malik from the original project from our senior design class, the Smart Chessboard. This is a standalone software web app that can run a chess game.
 
+The chess engine, AI, and the websocket server are made using Python, and the Frontend is made using Flutter.
+
+The AI uses minimax hard coded at a depth of 3 to find the best move to make based on material cost and if the move results in a checkmate.
+
+
+
 ## Usage
 
 ## How To Run
