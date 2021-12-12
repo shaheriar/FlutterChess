@@ -23,28 +23,27 @@ class _WinSplashState extends State<WinSplash> {
 
 splash(bool win) {
   return Scaffold(
-    backgroundColor: Colors.black87,
+    backgroundColor: Colors.transparent,
     body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              win ? StyledText('White Won!') : StyledText('Black Won!'),
               SizedBox(height: 20,),
+              Container(child: Center(child: win ? StyledText('White Won!') : StyledText('Black Won!'),),color: primary,width: MediaQuery.of(context).size.width/2),
+              Expanded(child: Container(),),
               TextButton(
                 style: TextButton.styleFrom(
-                  fixedSize: Size(200, 60),
+                  fixedSize: Size(MediaQuery.of(context).size.width/2, MediaQuery.of(context).size.height / 10),
                   primary: Colors.white,
-                  backgroundColor: darkbrown,
+                  backgroundColor: primary,
                 ),
                 onPressed: () {
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
-                child: Text(
-                  'Continue',
-                  style: TextStyle(fontSize: 35),
-                ),
-              )
+                child: StyledText('Continue')
+              ),
+              SizedBox(height: 20,)
             ],
           )
       ),

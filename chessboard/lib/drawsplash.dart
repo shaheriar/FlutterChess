@@ -26,25 +26,25 @@ splash(BuildContext context, String status) {
     backgroundColor: Colors.black,
     body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              StyledText(status[0].toUpperCase()+status.substring(1)+'!'),
+              
               SizedBox(height: 20,),
+              Container(child: Center(child: StyledText(status[0].toUpperCase()+status.substring(1)+'!'),),color: primary,width: MediaQuery.of(context).size.width/2),
+              Expanded(child: Container(),),
               TextButton(
                 style: TextButton.styleFrom(
-                  fixedSize: Size(200, 60),
+                  fixedSize: Size(MediaQuery.of(context).size.width/2, MediaQuery.of(context).size.height / 10),
                   primary: Colors.white,
                   backgroundColor: darkbrown,
                 ),
                 onPressed: () {
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
-                child: Text(
-                  'Continue',
-                  style: TextStyle(fontSize: 35),
-                ),
-              )
+                child: StyledText('Continue')
+              ),
+              SizedBox(height: 20,)
             ],
           )
       ),
