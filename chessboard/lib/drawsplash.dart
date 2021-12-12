@@ -23,7 +23,7 @@ class _DrawSplashState extends State<DrawSplash> {
 
 splash(BuildContext context, String status) {
   return Scaffold(
-    backgroundColor: Colors.black,
+    backgroundColor: Colors.transparent,
     body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

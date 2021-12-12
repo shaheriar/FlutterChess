@@ -112,12 +112,12 @@ class chessGame:
             elif(gameMode == 2):
                 if userColorForAIMode == False:  # The user is white because 0 is white
                     if turn == 0:
-                        board = await player1.makeMove(board, 3, turn, client)
+                        board = await player1.makeMove(board, 1, turn, client)
                     else:
                         if(numberOfMoves < 2):
                             board = AIPlayer.makeFirstMove(board)
                         else:
-                            board = AIPlayer.makeMove(board, 3, turn)
+                            board = AIPlayer.makeMove(board, 1, turn)
                 else:  # The user is black because 1 is black
                     if turn == 0:
                         if(numberOfMoves < 2):
@@ -163,7 +163,7 @@ class chessGame:
             moveData = {"move": board.peek().uci(), "board": boardlist, "status": "inprogress", "legalmoves": legal, 'ischeck': board.is_check()}
             print(boardlist)
             await client.send(json.dumps(moveData))
-            time.sleep(0.5)
+            time.sleep(0.3)
             isGameOver = await client.recv()
             if (isGameOver == 'Time'):
                 print('GAME ENDED BY TIME')
@@ -176,7 +176,7 @@ class chessGame:
                 print("GAME ENDED BY RESIGNATION")
                 # Save game up to here
                 break
-            time.sleep(0.5)
+            time.sleep(0.3)
             print('MESSAGE SENT')
             numberOfMoves += 1
 

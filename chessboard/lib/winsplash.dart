@@ -29,21 +29,22 @@ splash(bool win) {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 20,),
-              Container(child: Center(child: win ? StyledText('White Won!') : StyledText('Black Won!'),),color: primary,width: MediaQuery.of(context).size.width/2),
+              Container(width: MediaQuery.of(context).size.width/2,height: 20,color: primary,),
+              Container(child: Center(child: win ? StyledText('White Won!') : StyledText('Black Won!'),),color: primary,width: MediaQuery.of(context).size.width/2, height: MediaQuery.of(context).size.height / 10,),
               Expanded(child: Container(),),
               TextButton(
                 style: TextButton.styleFrom(
                   fixedSize: Size(MediaQuery.of(context).size.width/2, MediaQuery.of(context).size.height / 10),
                   primary: Colors.white,
-                  backgroundColor: primary,
+                  backgroundColor: buttoncolor,
+                  
                 ),
                 onPressed: () {
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
                 child: StyledText('Continue')
               ),
-              SizedBox(height: 20,)
+              SizedBox(height: 25,)
             ],
           )
       ),

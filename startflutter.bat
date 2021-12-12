@@ -1,1 +1,1 @@
-start chrome http://localhost:3000
+start chrome -incognito http://localhost:3000

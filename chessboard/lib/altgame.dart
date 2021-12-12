@@ -302,14 +302,17 @@ class _altgameState extends State<altgame> {
                 movefrom = -1;
                 moveto = -1;
               } else {
-                Map map = {
-                  'from': translate(movefrom),
-                  'to': translate(moveto),
-                  'status': 'inprogress'
-                };
-                String mp = jsonEncode(map);
-                _channel.sink.add(mp);
+                if (islegal(squares[translate(movefrom)]+squares[translate(moveto)])) {
+                  
+                  Map map = {
+                    'from': translate(movefrom),
+                    'to': translate(moveto),
+                    'status': 'inprogress'
+                  };
+                  String mp = jsonEncode(map);
+                  _channel.sink.add(mp);
 
+                }
                 fromclicked = false;
                 toclicked = false;
                 movefrom = -1;
@@ -375,6 +378,18 @@ class _altgameState extends State<altgame> {
     return Colors.transparent;
   }
 
+  islegal(move) {
+    print('CHECKING IF $move IS LEGAL');
+    for (int i = 0; i < legalmoves.length; i++) {
+      if (move == legalmoves[i]) {
+        print('IT IS LEGAL');
+        return true;
+      }
+    }
+    print('IT IS NOT LEGAL');
+    return false;
+  }
+
   translate(int n) {
     int j = (n / 8).floor();
     int k = n % 8;
@@ -415,7 +430,7 @@ class _altgameState extends State<altgame> {
                       PageRouteBuilder(
                         opaque: false,
                         pageBuilder: (context, animation1, animation2) =>
-                            WinSplash(win: turn),
+                            WinSplash(win: moves.length != 0),
                       ),
                     ),
                   );
@@ -481,7 +496,7 @@ class _altgameState extends State<altgame> {
     return Container(
       color: primary,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
@@ -560,10 +575,10 @@ class _altgameState extends State<altgame> {
   Widget altresignbutton() {
     return TextButton(
       style: TextButton.styleFrom(
-        fixedSize: Size(MediaQuery.of(context).size.width / 4,
+        fixedSize: Size(MediaQuery.of(context).size.width / 4 - 20,
             MediaQuery.of(context).size.height / 10),
         primary: Colors.white,
-        backgroundColor: primary,
+        backgroundColor: buttoncolor,
       ),
       onPressed: () {
         setState(() {
@@ -590,10 +605,10 @@ class _altgameState extends State<altgame> {
   Widget offerdraw() {
     return TextButton(
       style: TextButton.styleFrom(
-        fixedSize: Size(MediaQuery.of(context).size.width / 4,
+        fixedSize: Size(MediaQuery.of(context).size.width / 4 - 20,
             MediaQuery.of(context).size.height / 10),
         primary: Colors.white,
-        backgroundColor: primary,
+        backgroundColor: buttoncolor,
       ),
       onPressed: () {
         Navigator.push(
