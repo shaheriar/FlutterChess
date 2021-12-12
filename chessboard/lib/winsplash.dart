@@ -17,11 +17,11 @@ class _WinSplashState extends State<WinSplash> {
     winner = win;
   }
   Widget build(BuildContext context) {
-    return splash(context, winner);
+    return WillPopScope(child: splash(winner), onWillPop: () async => false,);
   }
-}
+  
 
-splash(BuildContext context, bool win) {
+splash(bool win) {
   return Scaffold(
     backgroundColor: Colors.black87,
     body: Center(
@@ -49,6 +49,7 @@ splash(BuildContext context, bool win) {
           )
       ),
   );
+}
 }
 
 StyledText(String text) {
