@@ -34,6 +34,7 @@ class _altgameState extends State<altgame> {
   bool fromclicked = false;
   bool toclicked = false;
   bool thinking = false;
+  bool stoptimer = false;
   List<dynamic> boardlist = [];
   List<dynamic> legalmoves = [];
   ScrollController _scrollControllerw = ScrollController();
@@ -61,28 +62,52 @@ class _altgameState extends State<altgame> {
     wmin = 30;
     wsec = 0;
     boardlist = List.from(defaultboard.reversed);
-    legalmoves = ['g1h3', 'g1f3', 'b1c3', 'b1a3', 'h2h3', 'g2g3', 'f2f3', 'e2e3', 'd2d3', 'c2c3', 'b2b3', 'a2a3', 'h2h4', 'g2g4', 'f2f4', 'e2e4', 'd2d4', 'c2c4', 'b2b4', 'a2a4'];
+    legalmoves = [
+      'g1h3',
+      'g1f3',
+      'b1c3',
+      'b1a3',
+      'h2h3',
+      'g2g3',
+      'f2f3',
+      'e2e3',
+      'd2d3',
+      'c2c3',
+      'b2b3',
+      'a2a3',
+      'h2h4',
+      'g2g4',
+      'f2f4',
+      'e2e4',
+      'd2d4',
+      'c2c4',
+      'b2b4',
+      'a2a4'
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: primary,
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        child: Column(
-          children: [
-            times(),
-            Container(
-              height: 10,
-              color: primary,
-            ),
-            moveslist(),
-            buttons(),
-          ],
+    return WillPopScope(
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: primary,
+        body: Container(
+          height: MediaQuery.of(context).size.height,
+          child: Column(
+            children: [
+              times(),
+              Container(
+                height: 10,
+                color: primary,
+              ),
+              moveslist(),
+              buttons(),
+            ],
+          ),
         ),
       ),
+      onWillPop: () async => false,
     );
   }
 
@@ -92,15 +117,17 @@ class _altgameState extends State<altgame> {
         builder: (context, snapshot) {
           if (moves.length % 2 == 0) {
             turn = false;
-            whitetime();
+            if (!stoptimer) {
+              whitetime();
+            }
           } else {
             turn = true;
-            blacktime();
+            if (!stoptimer) {
+              blacktime();
+            }
           }
           if (bsec == 0 && bmin == 0) {
-            Map mp = {
-              'status': 'Time'
-            };
+            Map mp = {'status': 'Time'};
             _channel.sink.add(jsonEncode(mp));
             flag = true;
             winner = flag;
@@ -144,9 +171,27 @@ class _altgameState extends State<altgame> {
                   ),
                 ),
               ),
-              ischeck ? Text('Check!',style: TextStyle(color: Colors.white, fontSize: 50)) : turn ? Text('Black\'s Turn',style: TextStyle(color: Colors.white, fontSize: 50)) : Text('White\'s Turn',style: TextStyle(color: Colors.white, fontSize: 50)),
-              Container(height: 50,width: 50,child: (turn != inf.check && inf.h != 1) ?  CircularProgressIndicator(color: Colors.white,) : Container(),),
-              Text('Move ${moves.length}', style: TextStyle(color: Colors.white, fontSize: 50),),
+              ischeck
+                  ? Text('Check!',
+                      style: TextStyle(color: Colors.white, fontSize: 50))
+                  : turn
+                      ? Text('Black\'s Turn',
+                          style: TextStyle(color: Colors.white, fontSize: 50))
+                      : Text('White\'s Turn',
+                          style: TextStyle(color: Colors.white, fontSize: 50)),
+              Container(
+                height: 50,
+                width: 50,
+                child: (turn != inf.check && inf.h != 1)
+                    ? CircularProgressIndicator(
+                        color: Colors.white,
+                      )
+                    : Container(),
+              ),
+              Text(
+                'Move ${moves.length}',
+                style: TextStyle(color: Colors.white, fontSize: 50),
+              ),
               Container(
                 color: darkbrown,
                 width: MediaQuery.of(context).size.width / 4,
@@ -176,16 +221,16 @@ class _altgameState extends State<altgame> {
               itemCount: 8,
               reverse: true,
               itemBuilder: (BuildContext context, int index) {
-                int i = index+1;
+                int i = index + 1;
                 return Container(
-                    height: (MediaQuery.of(context).size.width / 3)/8,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        '$i',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                  height: (MediaQuery.of(context).size.width / 3) / 8,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '$i',
+                      style: TextStyle(color: Colors.white),
                     ),
+                  ),
                 );
               }),
         ),
@@ -212,7 +257,7 @@ class _altgameState extends State<altgame> {
                   itemBuilder: (BuildContext context, int index) {
                     String c = String.fromCharCode(index + 97);
                     return SizedBox(
-                      width: (MediaQuery.of(context).size.width / 3)/8,
+                      width: (MediaQuery.of(context).size.width / 3) / 8,
                       child: Center(
                         child: Text(
                           '$c',
@@ -224,7 +269,6 @@ class _altgameState extends State<altgame> {
             ),
           ],
         ),
-        
       ],
     );
   }
@@ -239,42 +283,39 @@ class _altgameState extends State<altgame> {
             } else {
               wsec += 1;
             }
-          if (!fromclicked) {
-            movefrom = index;
-            fromclicked = true;
-          } else if (fromclicked && !toclicked) {
-            moveto = index;
-            toclicked = true;
-          } else {
-            fromclicked = false;
-            toclicked = false;
-            movefrom = -1;
-            moveto = -1;
-          }
-          if (movefrom != -1 && moveto != -1) {
-            if (movefrom == moveto) {
+            if (!fromclicked) {
+              movefrom = index;
+              fromclicked = true;
+            } else if (fromclicked && !toclicked) {
+              moveto = index;
+              toclicked = true;
+            } else {
               fromclicked = false;
               toclicked = false;
               movefrom = -1;
               moveto = -1;
-            } else {
-
-          Map map = {
-          'from': translate(movefrom), 
-          'to': translate(moveto),
-          'status': 'inprogress'
-          };
-          String mp = jsonEncode(map);
-          _channel.sink.add(mp);
-          
-            fromclicked = false;
-            toclicked = false;
-            movefrom = -1;
-            moveto = -1;
-
             }
-            
-          }
+            if (movefrom != -1 && moveto != -1) {
+              if (movefrom == moveto) {
+                fromclicked = false;
+                toclicked = false;
+                movefrom = -1;
+                moveto = -1;
+              } else {
+                Map map = {
+                  'from': translate(movefrom),
+                  'to': translate(moveto),
+                  'status': 'inprogress'
+                };
+                String mp = jsonEncode(map);
+                _channel.sink.add(mp);
+
+                fromclicked = false;
+                toclicked = false;
+                movefrom = -1;
+                moveto = -1;
+              }
+            }
           });
         },
         child: Stack(
@@ -282,18 +323,23 @@ class _altgameState extends State<altgame> {
             Container(
               width: 90,
               height: 90,
-              color: moves.length > 0 ? ((moves[moves.length-1].substring(0,2) == squares[translate(index)] || moves[moves.length-1].substring(2) == squares[translate(index)]) ? Colors.blueGrey[200] : getcolor(index)) : getcolor(index),
+              color: moves.length > 0
+                  ? ((moves[moves.length - 1].substring(0, 2) ==
+                              squares[translate(index)] ||
+                          moves[moves.length - 1].substring(2) ==
+                              squares[translate(index)])
+                      ? Colors.blueGrey[200]
+                      : getcolor(index))
+                  : getcolor(index),
             ),
-            
             Center(child: getpiece(boardlist[index].toString())),
             Center(
               child: Container(
                 width: 20,
                 height: 20,
-          decoration: BoxDecoration(
-              color: decidecolor(movefrom, index),
-              shape: BoxShape.circle
-          ),
+                decoration: BoxDecoration(
+                    color: decidecolor(movefrom, index),
+                    shape: BoxShape.circle),
               ),
             ),
           ],
@@ -316,14 +362,15 @@ class _altgameState extends State<altgame> {
       return Colors.green;
     } else if (legalmoves.length > 0 && movefrom != -1) {
       for (int i = 0; i < legalmoves.length; i++) {
-      if (legalmoves[i].substring(0,2) == squares[translate(movefrom)]) {
-        for (int j = 0; j < squares.length; j++) {
-          if (squares[j] == legalmoves[i].substring(2) && j == translate(index)) {
-            return Colors.yellow;
+        if (legalmoves[i].substring(0, 2) == squares[translate(movefrom)]) {
+          for (int j = 0; j < squares.length; j++) {
+            if (squares[j] == legalmoves[i].substring(2) &&
+                j == translate(index)) {
+              return Colors.yellow;
+            }
           }
         }
       }
-    }
     }
     return Colors.transparent;
   }
@@ -331,7 +378,7 @@ class _altgameState extends State<altgame> {
   translate(int n) {
     int j = (n / 8).floor();
     int k = n % 8;
-    int h = 64 - (8 - k) - (8*j);
+    int h = 64 - (8 - k) - (8 * j);
     return h;
   }
 
@@ -357,27 +404,32 @@ class _altgameState extends State<altgame> {
             }
             if (data["status"] != null) {
               String status = data["status"];
-              if (status == "checkmate" || status == "stalemate" || status == "repetition") {
+              if (status == "checkmate" ||
+                  status == "stalemate" ||
+                  status == "repetition") {
+                stoptimer = true;
                 if (status == "checkmate") {
                   WidgetsBinding.instance!.addPostFrameCallback(
-     (_) => Navigator.push(
-          context,
-          PageRouteBuilder(
-            opaque: false,
-            pageBuilder: (context, animation1, animation2) =>
-                WinSplash(win: turn),
-          ),
-        ),);
+                    (_) => Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        opaque: false,
+                        pageBuilder: (context, animation1, animation2) =>
+                            WinSplash(win: turn),
+                      ),
+                    ),
+                  );
                 } else {
-                   WidgetsBinding.instance!.addPostFrameCallback(
-     (_) => Navigator.push(
-          context,
-          PageRouteBuilder(
-            opaque: false,
-            pageBuilder: (context, animation1, animation2) =>
-                DrawSplash(status: status),
-          ),
-        ),);
+                  WidgetsBinding.instance!.addPostFrameCallback(
+                    (_) => Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        opaque: false,
+                        pageBuilder: (context, animation1, animation2) =>
+                            DrawSplash(status: status),
+                      ),
+                    ),
+                  );
                 }
               }
             }
@@ -432,10 +484,18 @@ class _altgameState extends State<altgame> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(color: lightbrown,height: MediaQuery.of(context).size.height / 10,width: MediaQuery.of(context).size.width / 4,),
+          Container(
+            color: lightbrown,
+            height: MediaQuery.of(context).size.height / 10,
+            width: MediaQuery.of(context).size.width / 4,
+          ),
           offerdraw(),
           altresignbutton(),
-          Container(color: darkbrown,height: MediaQuery.of(context).size.height / 10,width: MediaQuery.of(context).size.width / 4,),
+          Container(
+            color: darkbrown,
+            height: MediaQuery.of(context).size.height / 10,
+            width: MediaQuery.of(context).size.width / 4,
+          ),
         ],
       ),
     );
@@ -506,9 +566,10 @@ class _altgameState extends State<altgame> {
         backgroundColor: primary,
       ),
       onPressed: () {
-        Map mp = {
-                    'status': 'Resign'
-                  };
+        setState(() {
+          stoptimer = true;
+        });
+        Map mp = {'status': 'Resign'};
         _channel.sink.add(jsonEncode(mp));
         Navigator.push(
           context,
@@ -573,9 +634,7 @@ class _altgameState extends State<altgame> {
                   backgroundColor: darkbrown,
                 ),
                 onPressed: () {
-                  Map mp = {
-                    'status': 'Draw'
-                  };
+                  Map mp = {'status': 'Draw'};
                   _channel.sink.add(jsonEncode(mp));
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
@@ -685,12 +744,68 @@ List<String> defaultboard = [
 ];
 
 List<String> squares = [
-    'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1',
-    'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
-    'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
-    'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
-    'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
-    'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
-    'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
-    'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
+  'a1',
+  'b1',
+  'c1',
+  'd1',
+  'e1',
+  'f1',
+  'g1',
+  'h1',
+  'a2',
+  'b2',
+  'c2',
+  'd2',
+  'e2',
+  'f2',
+  'g2',
+  'h2',
+  'a3',
+  'b3',
+  'c3',
+  'd3',
+  'e3',
+  'f3',
+  'g3',
+  'h3',
+  'a4',
+  'b4',
+  'c4',
+  'd4',
+  'e4',
+  'f4',
+  'g4',
+  'h4',
+  'a5',
+  'b5',
+  'c5',
+  'd5',
+  'e5',
+  'f5',
+  'g5',
+  'h5',
+  'a6',
+  'b6',
+  'c6',
+  'd6',
+  'e6',
+  'f6',
+  'g6',
+  'h6',
+  'a7',
+  'b7',
+  'c7',
+  'd7',
+  'e7',
+  'f7',
+  'g7',
+  'h7',
+  'a8',
+  'b8',
+  'c8',
+  'd8',
+  'e8',
+  'f8',
+  'g8',
+  'h8',
 ];
