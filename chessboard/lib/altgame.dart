@@ -282,7 +282,7 @@ class _altgameState extends State<altgame> {
             Container(
               width: 90,
               height: 90,
-              color: moves.length > 0 ? ((moves[moves.length-1].substring(0,2) == squares[translate(index)] || moves[moves.length-1].substring(2) == squares[translate(index)]) ? Colors.amber : getcolor(index)) : getcolor(index),
+              color: moves.length > 0 ? ((moves[moves.length-1].substring(0,2) == squares[translate(index)] || moves[moves.length-1].substring(2) == squares[translate(index)]) ? Colors.blueGrey[200] : getcolor(index)) : getcolor(index),
             ),
             
             Center(child: getpiece(boardlist[index].toString())),
@@ -303,11 +303,11 @@ class _altgameState extends State<altgame> {
   }
 
   decidecolor(int movefrom, int index) {
-    if (boardlist[index].toString() == 'K' && turn) {
+    if (boardlist[index].toString() == 'K' && moves.length % 2 == 0) {
       if (ischeck) {
         return Colors.red;
       }
-    } else if (boardlist[index].toString() == 'k' && !turn) {
+    } else if (boardlist[index].toString() == 'k' && moves.length % 2 != 0) {
       if (ischeck) {
         return Colors.red;
       }
@@ -352,6 +352,8 @@ class _altgameState extends State<altgame> {
             }
             if (data["ischeck"] != null) {
               ischeck = data["ischeck"];
+            } else {
+              ischeck = false;
             }
             if (data["status"] != null) {
               String status = data["status"];
