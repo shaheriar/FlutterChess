@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   title() {
     return Text(
-      'Flython Chess',
+      'Flutter Chess',
       style: TextStyle(
         color: Colors.white,
         fontSize: 80,
