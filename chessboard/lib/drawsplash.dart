@@ -17,39 +17,40 @@ class _DrawSplashState extends State<DrawSplash> {
     status = stat;
   }
   Widget build(BuildContext context) {
-    return splash(context, status);
+    return splash(status);
   }
-}
-
-splash(BuildContext context, String status) {
+  splash(String status) {
   return Scaffold(
     backgroundColor: Colors.transparent,
     body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              
-              SizedBox(height: 20,),
-              Container(child: Center(child: StyledText(status[0].toUpperCase()+status.substring(1)+'!'),),color: primary,width: MediaQuery.of(context).size.width/2),
+              Container(width: MediaQuery.of(context).size.width/2,height: 20,color: primary,),
+              Container(child: Center(child: StyledText(status+'!')),color: primary,width: MediaQuery.of(context).size.width/2, height: MediaQuery.of(context).size.height / 10,),
               Expanded(child: Container(),),
               TextButton(
                 style: TextButton.styleFrom(
                   fixedSize: Size(MediaQuery.of(context).size.width/2, MediaQuery.of(context).size.height / 10),
                   primary: Colors.white,
-                  backgroundColor: darkbrown,
+                  backgroundColor: buttoncolor,
+                  
                 ),
                 onPressed: () {
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
                 child: StyledText('Continue')
               ),
-              SizedBox(height: 20,)
+              SizedBox(height: 25,)
             ],
           )
       ),
   );
 }
+}
+
+
 
 StyledText(String text) {
   return Text(

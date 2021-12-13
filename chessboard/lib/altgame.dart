@@ -115,13 +115,11 @@ class _altgameState extends State<altgame> {
     return StreamBuilder(
         stream: Stream.periodic(const Duration(seconds: 1)),
         builder: (context, snapshot) {
-          if (moves.length % 2 == 0) {
-            turn = false;
+          if (!turn) {
             if (!stoptimer) {
               whitetime();
             }
           } else {
-            turn = true;
             if (!stoptimer) {
               blacktime();
             }
@@ -283,40 +281,41 @@ class _altgameState extends State<altgame> {
             } else {
               wsec += 1;
             }
-            if (!fromclicked) {
-              movefrom = index;
-              fromclicked = true;
-            } else if (fromclicked && !toclicked) {
-              moveto = index;
-              toclicked = true;
-            } else {
-              fromclicked = false;
-              toclicked = false;
-              movefrom = -1;
-              moveto = -1;
-            }
-            if (movefrom != -1 && moveto != -1) {
-              if (movefrom == moveto) {
-                fromclicked = false;
-                toclicked = false;
-                movefrom = -1;
-                moveto = -1;
+            if ((inf.h == 2 && turn == inf.check) || inf.h == 1) {
+              if (!fromclicked) {
+                movefrom = index;
+                fromclicked = true;
+              } else if (fromclicked && !toclicked) {
+                moveto = index;
+                toclicked = true;
               } else {
-                if (islegal(squares[translate(movefrom)]+squares[translate(moveto)])) {
-                  
-                  Map map = {
-                    'from': translate(movefrom),
-                    'to': translate(moveto),
-                    'status': 'inprogress'
-                  };
-                  String mp = jsonEncode(map);
-                  _channel.sink.add(mp);
-
-                }
                 fromclicked = false;
                 toclicked = false;
                 movefrom = -1;
                 moveto = -1;
+              }
+              if (movefrom != -1 && moveto != -1) {
+                if (movefrom == moveto) {
+                  fromclicked = false;
+                  toclicked = false;
+                  movefrom = -1;
+                  moveto = -1;
+                } else {
+                  if (islegal(squares[translate(movefrom)] +
+                      squares[translate(moveto)])) {
+                    Map map = {
+                      'from': translate(movefrom),
+                      'to': translate(moveto),
+                      'status': 'inprogress'
+                    };
+                    String mp = jsonEncode(map);
+                    _channel.sink.add(mp);
+                  }
+                  fromclicked = false;
+                  toclicked = false;
+                  movefrom = -1;
+                  moveto = -1;
+                }
               }
             }
           });
@@ -329,7 +328,7 @@ class _altgameState extends State<altgame> {
               color: moves.length > 0
                   ? ((moves[moves.length - 1].substring(0, 2) ==
                               squares[translate(index)] ||
-                          moves[moves.length - 1].substring(2) ==
+                          moves[moves.length - 1].substring(2, 4) ==
                               squares[translate(index)])
                       ? Colors.blueGrey[200]
                       : getcolor(index))
@@ -352,11 +351,11 @@ class _altgameState extends State<altgame> {
   }
 
   decidecolor(int movefrom, int index) {
-    if (boardlist[index].toString() == 'K' && moves.length % 2 == 0) {
+    if (boardlist[index].toString() == 'K' && !turn) {
       if (ischeck) {
         return Colors.red;
       }
-    } else if (boardlist[index].toString() == 'k' && moves.length % 2 != 0) {
+    } else if (boardlist[index].toString() == 'k' && turn) {
       if (ischeck) {
         return Colors.red;
       }
@@ -367,7 +366,7 @@ class _altgameState extends State<altgame> {
       for (int i = 0; i < legalmoves.length; i++) {
         if (legalmoves[i].substring(0, 2) == squares[translate(movefrom)]) {
           for (int j = 0; j < squares.length; j++) {
-            if (squares[j] == legalmoves[i].substring(2) &&
+            if (squares[j] == legalmoves[i].substring(2, 4) &&
                 j == translate(index)) {
               return Colors.yellow;
             }
@@ -381,7 +380,7 @@ class _altgameState extends State<altgame> {
   islegal(move) {
     print('CHECKING IF $move IS LEGAL');
     for (int i = 0; i < legalmoves.length; i++) {
-      if (move == legalmoves[i]) {
+      if (move == legalmoves[i].substring(0, 4)) {
         print('IT IS LEGAL');
         return true;
       }
@@ -404,8 +403,14 @@ class _altgameState extends State<altgame> {
           if (snapshot.hasData) {
             var data = jsonDecode(snapshot.data.toString());
             if (data["move"] != null) {
-              if (!moves.contains(data["move"])) {
+              if (moves.length > 0) {
+                if (moves[moves.length - 1] != data["move"]) {
+                  moves.add(data["move"]);
+                  turn = !turn;
+                }
+              } else {
                 moves.add(data["move"]);
+                turn = !turn;
               }
             }
             if (data["board"] != null) {
@@ -430,7 +435,7 @@ class _altgameState extends State<altgame> {
                       PageRouteBuilder(
                         opaque: false,
                         pageBuilder: (context, animation1, animation2) =>
-                            WinSplash(win: moves.length != 0),
+                            WinSplash(win: moves.length % 2 != 0),
                       ),
                     ),
                   );
